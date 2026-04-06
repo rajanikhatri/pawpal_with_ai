@@ -145,11 +145,18 @@ class Scheduler:
 
     def get_todays_tasks(self, check_date: date) -> list[Task]:
         """Return all tasks that occur on the given date."""
-        pass
+        todays_tasks = []
+
+        for pet in self.owner.pets:
+            for task in pet.tasks:
+                if task.occurs_on(check_date):
+                    todays_tasks.append(task)
+
+        return todays_tasks
 
     def sort_by_time(self, tasks: list[Task]) -> list[Task]:
         """Return tasks sorted by start time."""
-        pass
+        return sorted(tasks, key=lambda task: task.start_time)
 
     def filter_tasks(
         self,
@@ -158,8 +165,40 @@ class Scheduler:
         pet_name: Optional[str] = None,
     ) -> list[Task]:
         """Return tasks filtered by category and/or pet name."""
-        pass
+        filtered_tasks = []
+        category_filter = category.strip().lower() if category is not None else None
+        pet_name_filter = pet_name.strip().lower() if pet_name is not None else None
+
+        for task in tasks:
+            matches_category = True
+            matches_pet = True
+
+            if category_filter is not None:
+                matches_category = task.category.lower() == category_filter
+
+            if pet_name_filter is not None:
+                matches_pet = False
+                for pet in self.owner.pets:
+                    if pet.name.lower() == pet_name_filter:
+                        for pet_task in pet.tasks:
+                            if pet_task is task:
+                                matches_pet = True
+                                break
+                    if matches_pet:
+                        break
+
+            if matches_category and matches_pet:
+                filtered_tasks.append(task)
+
+        return filtered_tasks
 
     def find_conflicts(self, tasks: list[Task]) -> list[tuple[Task, Task]]:
         """Return pairs of tasks that conflict with each other."""
-        pass
+        conflicts = []
+
+        for i in range(len(tasks)):
+            for j in range(i + 1, len(tasks)):
+                if tasks[i].conflicts_with(tasks[j]):
+                    conflicts.append((tasks[i], tasks[j]))
+
+        return conflicts
