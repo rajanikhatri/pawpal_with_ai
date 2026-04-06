@@ -8,7 +8,7 @@ and most methods are left as stubs for later implementation.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, time
+from datetime import date, datetime, time, timedelta
 from typing import Optional
 
 
@@ -26,19 +26,68 @@ class Task:
 
     def get_end_time(self) -> time:
         """Return the task's calculated end time."""
-        pass
+        start_datetime = datetime.combine(self.date, self.start_time)
+        end_datetime = start_datetime + timedelta(minutes=self.duration_minutes)
+        return end_datetime.time()
 
     def occurs_on(self, check_date: date) -> bool:
         """Return whether the task occurs on the given date."""
-        pass
+        repeat_type = self.repeat.strip().lower()
+
+        if repeat_type not in {"none", "daily", "weekly"}:
+            repeat_type = "none"
+
+        if repeat_type == "none":
+            return self.date == check_date
+
+        if repeat_type == "daily":
+            return check_date >= self.date
+
+        if repeat_type == "weekly":
+            days_apart = (check_date - self.date).days
+            return days_apart >= 0 and days_apart % 7 == 0
+
+        return False
 
     def conflicts_with(self, other_task: "Task") -> bool:
         """Return whether this task overlaps with another task."""
-        pass
+        self_repeat = self.repeat.strip().lower()
+        other_repeat = other_task.repeat.strip().lower()
+
+        if self_repeat not in {"none", "daily", "weekly"}:
+            self_repeat = "none"
+
+        if other_repeat not in {"none", "daily", "weekly"}:
+            other_repeat = "none"
+
+        self_start = datetime.combine(date.min, self.start_time)
+        self_end = self_start + timedelta(minutes=self.duration_minutes)
+
+        other_start = datetime.combine(date.min, other_task.start_time)
+        other_end = other_start + timedelta(minutes=other_task.duration_minutes)
+
+        times_overlap = self_start < other_end and other_start < self_end
+
+        if not times_overlap:
+            return False
+
+        if self_repeat == "none" and other_repeat == "none":
+            return self.date == other_task.date
+
+        if self_repeat == "none":
+            return other_task.occurs_on(self.date)
+
+        if other_repeat == "none":
+            return self.occurs_on(other_task.date)
+
+        if self_repeat == "daily" or other_repeat == "daily":
+            return True
+
+        return self.date.weekday() == other_task.date.weekday()
 
     def mark_complete(self) -> None:
         """Mark the task as completed."""
-        pass
+        self.completed = True
 
 
 @dataclass
