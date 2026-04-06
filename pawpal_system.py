@@ -123,15 +123,18 @@ class Owner:
 
     def add_pet(self, pet: Pet) -> None:
         """Add a pet to this owner."""
-        pass
+        self.pets.append(pet)
 
     def remove_pet(self, pet_name: str) -> None:
         """Remove a pet by name."""
-        pass
+        for pet in self.pets:
+            if pet.name == pet_name:
+                self.pets.remove(pet)
+                break
 
     def get_pets(self) -> list[Pet]:
         """Return the list of pets owned."""
-        pass
+        return self.pets
 
 
 @dataclass
