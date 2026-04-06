@@ -1,71 +1,57 @@
 # PawPal+ Project Reflection
 
-## 1. System Design
+## 1. Initial Design
 
-**a. Initial design**
+When I first planned PawPal+, I wanted the design to be simple and easy to understand. I chose the classes `Owner`, `Pet`, `Task`, and `Scheduler` because each one had a clear job.
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+- `Owner` represents the person using the system and keeps track of their pets.
+- `Pet` represents one pet and stores the tasks for that pet.
+- `Task` represents one care activity like feeding, walking, grooming, or medication.
+- `Scheduler` handles the scheduling logic, like finding today's tasks, sorting them by time, and checking for conflicts.
 
-**b. Design changes**
+I liked this design because it matched the problem in a natural way. Instead of putting everything into one big file with mixed logic, each class had one main responsibility.
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+## 2. Design Changes
 
----
+During development, I simplified the design a lot. At the beginning, it was easy to imagine adding more things like unique IDs, extra helper classes, database storage, or more advanced scheduling rules. But for this project, I realized that would make the code more complicated without adding much value.
 
-## 2. Scheduling Logic and Tradeoffs
+One example is that I decided not to use IDs for pets and tasks. For a larger app, IDs would probably be helpful, but for this class project I could just use pet names and task titles when needed.
 
-**a. Constraints and priorities**
+I also kept recurrence very simple with only three options: `none`, `daily`, and `weekly`. I did not try to support more advanced rules because that would make the project harder to manage.
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+I avoided overengineering because I wanted the code to stay readable and realistic for a student project. My goal was not to build a full production app. My goal was to build something that works, shows OOP design clearly, and is easy to explain.
 
-**b. Tradeoffs**
+## 3. Algorithmic Tradeoffs
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+My scheduling logic is intentionally simple. The scheduler collects tasks from all pets, checks which ones happen today, sorts them by start time, and then checks for overlaps.
 
----
+This works well for a class project, but it has limitations:
 
-## 3. AI Collaboration
+- it does not automatically resolve conflicts
+- it does not choose the "best" schedule
+- it does not use priority scoring or optimization
+- it does not handle advanced recurrence patterns
 
-**a. How you used AI**
+I accepted these limits because I wanted the system to stay focused on the core features. Instead of building a complicated scheduling algorithm, I built one that is easy to understand and test. I think that was the right choice for this project because it let me finish a working system instead of getting stuck trying to make it too smart.
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+## 4. AI Collaboration
 
-**b. Judgment and verification**
+I used AI tools like Codex and Claude to help with planning, coding structure, and improving small parts of the project. AI was especially helpful when I was:
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+- organizing the class design
+- turning the UML idea into class skeletons
+- writing method stubs
+- building small pytest tests
+- improving the README and reflection writing
 
----
+The most helpful prompts were specific ones. For example, it worked better when I asked for only one class at a time or one file at a time instead of asking for the whole project at once.
 
-## 4. Testing and Verification
+One example where I changed an AI suggestion was during the design stage. Some suggestions made the project more complex than I needed, like adding IDs everywhere or making the scheduler more advanced. I decided not to follow that direction and kept the design smaller with just the four main classes and simple recurrence rules. I also checked the code by running the CLI demo, testing the Streamlit app, and running pytest instead of assuming every AI suggestion was correct.
 
-**a. What you tested**
+## 5. What I Learned
 
-- What behaviors did you test?
-- Why were these tests important?
+One thing I learned about system design is that a simple design is often better than a complicated one, especially early on. Having four clear classes made the project easier to build step by step. It also made debugging easier because I could focus on one class at a time.
 
-**b. Confidence**
+I also learned that AI is most useful when I give it clear boundaries. If I ask something broad, the answer can become too big or too complicated. If I ask for one small step at a time, the help is much more useful. I also learned that I still need to review and test everything myself. AI helped me move faster, but I still had to make the final decisions and verify that the code matched my project goals.
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
-
----
-
-## 5. Reflection
-
-**a. What went well**
-
-- What part of this project are you most satisfied with?
-
-**b. What you would improve**
-
-- If you had another iteration, what would you improve or redesign?
-
-**c. Key takeaway**
-
-- What is one important thing you learned about designing systems or working with AI on this project?
+Overall, this project helped me practice object-oriented design, basic scheduling logic, testing, and working with AI in a more thoughtful way.
