@@ -100,15 +100,18 @@ class Pet:
 
     def add_task(self, task: Task) -> None:
         """Add a task to this pet."""
-        pass
+        self.tasks.append(task)
 
     def remove_task(self, task_title: str) -> None:
         """Remove a task by its title."""
-        pass
+        for task in self.tasks:
+            if task.title == task_title:
+                self.tasks.remove(task)
+                break
 
     def get_tasks(self) -> list[Task]:
         """Return the list of tasks for this pet."""
-        pass
+        return self.tasks
 
 
 @dataclass
