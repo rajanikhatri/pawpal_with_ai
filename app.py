@@ -230,12 +230,10 @@ def show_add_task_dialog(owner: Owner) -> None:
         )
         selected_pet.add_task(new_task)
         st.session_state.flash_message = f"{title} was added for {selected_pet.name}."
-        st.session_state.task_form_date = st.session_state.schedule_date
         close_task_dialog()
         st.rerun()
 
     if st.button("Cancel", use_container_width=True):
-        st.session_state.task_form_date = st.session_state.schedule_date
         close_task_dialog()
         st.rerun()
 
