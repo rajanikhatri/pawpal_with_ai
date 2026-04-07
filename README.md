@@ -12,6 +12,10 @@ This project uses:
 - Streamlit
 - pytest
 
+## Live Demo
+
+Streamlit app: [https://pawpal-pet-management-system.streamlit.app/](https://pawpal-pet-management-system.streamlit.app/)
+
 ## Features
 
 - Add pets
