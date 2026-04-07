@@ -37,13 +37,21 @@ def find_pet_by_name(owner: Owner, pet_name: str) -> Pet | None:
     return None
 
 
-def find_pet_name_for_task(owner: Owner, task: Task) -> str:
-    """Return the name of the pet that owns the task."""
+def find_owning_pet(owner: Owner, task: Task) -> Pet | None:
+    """Return the pet that owns the given task."""
     for pet in owner.get_pets():
         for pet_task in pet.get_tasks():
             if pet_task is task:
-                return pet.name
-    return "Unknown"
+                return pet
+    return None
+
+
+def find_pet_name_for_task(owner: Owner, task: Task) -> str:
+    """Return the name of the pet that owns the task."""
+    pet = find_owning_pet(owner, task)
+    if pet is None:
+        return "Unknown"
+    return pet.name
 
 
 def show_flash_message() -> None:
@@ -65,6 +73,34 @@ def close_task_dialog() -> None:
     st.session_state.show_task_dialog = False
 
 
+def open_edit_dialog(owner: Owner, task: Task) -> None:
+    """Open the edit-task dialog with the task's current values."""
+    owning_pet = find_owning_pet(owner, task)
+
+    if owning_pet is None:
+        st.session_state.flash_message = "Task could not be found."
+        return
+
+    category_value = task.category if task.category in CATEGORY_OPTIONS[1:] else "Other"
+    repeat_value = task.repeat if task.repeat in {"none", "daily", "weekly"} else "none"
+
+    st.session_state.edit_task = task
+    st.session_state.edit_task_pet_name = owning_pet.name
+    st.session_state.edit_task_title = task.title
+    st.session_state.edit_task_category = category_value
+    st.session_state.edit_task_date = task.date
+    st.session_state.edit_task_time = task.start_time
+    st.session_state.edit_task_duration = int(task.duration_minutes)
+    st.session_state.edit_task_repeat = repeat_value
+    st.session_state.show_edit_dialog = True
+
+
+def close_edit_dialog() -> None:
+    """Close the edit-task dialog."""
+    st.session_state.show_edit_dialog = False
+    st.session_state.edit_task = None
+
+
 def get_task_end_datetime(task: Task, reference_date: date) -> datetime:
     """Return the end datetime for a task on the reference date."""
     start_datetime = datetime.combine(reference_date, task.start_time)
@@ -77,6 +113,75 @@ def complete_task(task: Task, occurrence_date: date) -> None:
     st.session_state.flash_message = (
         f"{task.title} was marked as complete for {occurrence_date.strftime('%B %d, %Y')}."
     )
+
+
+def delete_task(owner: Owner, task: Task) -> None:
+    """Delete the exact task from the pet that owns it."""
+    owning_pet = find_owning_pet(owner, task)
+
+    if owning_pet is None:
+        st.session_state.flash_message = "Task could not be found."
+        return
+
+    owning_pet.tasks.remove(task)
+
+    if st.session_state.get("edit_task") is task:
+        close_edit_dialog()
+
+    st.session_state.flash_message = f"{task.title} was deleted."
+
+
+def save_edited_task(owner: Owner) -> None:
+    """Update the selected task with the current edit form values."""
+    task = st.session_state.get("edit_task")
+
+    if task is None:
+        st.warning("No task is selected for editing.")
+        return
+
+    current_pet = find_owning_pet(owner, task)
+    new_pet = find_pet_by_name(owner, st.session_state.edit_task_pet_name)
+    new_title = st.session_state.edit_task_title.strip()
+    new_category = st.session_state.edit_task_category
+    new_date = st.session_state.edit_task_date
+    new_time = st.session_state.edit_task_time
+    new_duration = int(st.session_state.edit_task_duration)
+    new_repeat = st.session_state.edit_task_repeat
+
+    if not new_title:
+        st.warning("Please enter a task title.")
+        return
+
+    if current_pet is None or new_pet is None:
+        st.warning("Please select a valid pet.")
+        return
+
+    schedule_changed = (
+        task.date != new_date
+        or task.start_time != new_time
+        or task.duration_minutes != new_duration
+        or task.repeat != new_repeat
+    )
+    recurring_involved = task.repeat in {"daily", "weekly"} or new_repeat in {"daily", "weekly"}
+
+    task.title = new_title
+    task.category = new_category
+    task.date = new_date
+    task.start_time = new_time
+    task.duration_minutes = new_duration
+    task.repeat = new_repeat
+
+    if current_pet is not new_pet:
+        current_pet.tasks.remove(task)
+        new_pet.add_task(task)
+
+    if schedule_changed and recurring_involved:
+        task.completed_dates.clear()
+        task.completed = False
+
+    st.session_state.flash_message = f"{task.title} was updated."
+    close_edit_dialog()
+    st.rerun()
 
 
 def get_task_status(task: Task, reference_date: date, current_datetime: datetime) -> str:
@@ -104,6 +209,8 @@ def render_task_card(owner: Owner, task: Task, reference_date: date, current_dat
     status_class = f"status-{status.lower()}"
     card_class = f"card-{status.lower()}"
     button_key = f"complete_{id(task)}"
+    edit_button_key = f"edit_{id(task)}"
+    delete_button_key = f"delete_{id(task)}"
 
     with st.container():
         st.markdown(
@@ -131,9 +238,10 @@ def render_task_card(owner: Owner, task: Task, reference_date: date, current_dat
             unsafe_allow_html=True,
         )
 
+        complete_col, edit_col, delete_col, _ = st.columns([1.5, 1, 1, 3.5])
+
         if status == "Pending":
-            action_col, _ = st.columns([1, 4])
-            with action_col:
+            with complete_col:
                 if st.button(
                     "Mark as Complete",
                     key=button_key,
@@ -144,8 +252,7 @@ def render_task_card(owner: Owner, task: Task, reference_date: date, current_dat
                     st.rerun()
 
         elif status == "Overdue":
-            action_col, _ = st.columns([1, 4])
-            with action_col:
+            with complete_col:
                 if st.button(
                     "Mark as Complete",
                     key=button_key,
@@ -153,6 +260,24 @@ def render_task_card(owner: Owner, task: Task, reference_date: date, current_dat
                 ):
                     complete_task(task, reference_date)
                     st.rerun()
+
+        with edit_col:
+            if st.button(
+                "Edit",
+                key=edit_button_key,
+                use_container_width=True,
+            ):
+                open_edit_dialog(owner, task)
+                st.rerun()
+
+        with delete_col:
+            if st.button(
+                "Delete",
+                key=delete_button_key,
+                use_container_width=True,
+            ):
+                delete_task(owner, task)
+                st.rerun()
 
 
 def render_category_menu() -> None:
@@ -240,6 +365,64 @@ def show_add_task_dialog(owner: Owner) -> None:
         st.rerun()
 
 
+@st.dialog("Edit Task", width="large", on_dismiss=close_edit_dialog)
+def show_edit_task_dialog(owner: Owner) -> None:
+    """Show the edit-task form in a dialog."""
+    task = st.session_state.get("edit_task")
+
+    if task is None:
+        st.info("No task selected.")
+        if st.button("Close", use_container_width=True):
+            close_edit_dialog()
+            st.rerun()
+        return
+
+    pet_names = [pet.name for pet in owner.get_pets()]
+
+    if not pet_names:
+        st.info("No pets are available.")
+        if st.button("Close", use_container_width=True):
+            close_edit_dialog()
+            st.rerun()
+        return
+
+    if st.session_state.edit_task_pet_name not in pet_names:
+        st.session_state.edit_task_pet_name = pet_names[0]
+
+    if st.session_state.edit_task_category not in CATEGORY_OPTIONS[1:]:
+        st.session_state.edit_task_category = "Other"
+
+    if st.session_state.edit_task_repeat not in {"none", "daily", "weekly"}:
+        st.session_state.edit_task_repeat = "none"
+
+    with st.form("edit_task_form_dialog"):
+        st.selectbox("Pet", pet_names, key="edit_task_pet_name")
+        st.text_input("Task title", key="edit_task_title")
+        st.selectbox(
+            "Category",
+            CATEGORY_OPTIONS[1:],
+            key="edit_task_category",
+        )
+        st.date_input("Date", key="edit_task_date")
+        st.time_input("Time", key="edit_task_time")
+        st.number_input(
+            "Duration (minutes)",
+            min_value=1,
+            max_value=240,
+            step=5,
+            key="edit_task_duration",
+        )
+        st.selectbox("Repeat", ["none", "daily", "weekly"], key="edit_task_repeat")
+        save_edit_submitted = st.form_submit_button("Save Changes", type="primary")
+
+    if save_edit_submitted:
+        save_edited_task(owner)
+
+    if st.button("Cancel", use_container_width=True):
+        close_edit_dialog()
+        st.rerun()
+
+
 if "owner" not in st.session_state:
     st.session_state.owner = Owner(name="Jordan")
 
@@ -257,6 +440,12 @@ if "task_form_date" not in st.session_state:
 
 if "show_task_dialog" not in st.session_state:
     st.session_state.show_task_dialog = False
+
+if "show_edit_dialog" not in st.session_state:
+    st.session_state.show_edit_dialog = False
+
+if "edit_task" not in st.session_state:
+    st.session_state.edit_task = None
 
 if "flash_message" not in st.session_state:
     st.session_state.flash_message = ""
@@ -484,6 +673,9 @@ with header_profile_col:
 
 if st.session_state.show_task_dialog:
     show_add_task_dialog(owner)
+
+if st.session_state.show_edit_dialog:
+    show_edit_task_dialog(owner)
 
 
 show_flash_message()
