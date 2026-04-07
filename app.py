@@ -71,15 +71,17 @@ def get_task_end_datetime(task: Task, reference_date: date) -> datetime:
     return start_datetime + timedelta(minutes=task.duration_minutes)
 
 
-def complete_task(task: Task) -> None:
+def complete_task(task: Task, occurrence_date: date) -> None:
     """Mark a task complete and show a success message."""
-    task.mark_complete()
-    st.session_state.flash_message = f"{task.title} was marked as complete."
+    task.mark_complete(occurrence_date)
+    st.session_state.flash_message = (
+        f"{task.title} was marked as complete for {occurrence_date.strftime('%B %d, %Y')}."
+    )
 
 
 def get_task_status(task: Task, reference_date: date, current_datetime: datetime) -> str:
     """Return the display status for a task on the current day."""
-    if task.completed:
+    if task.is_completed_on(reference_date):
         return "Completed"
 
     if reference_date == current_datetime.date() and task.occurs_on(reference_date):
@@ -138,7 +140,7 @@ def render_task_card(owner: Owner, task: Task, reference_date: date, current_dat
                     type="primary",
                     use_container_width=True,
                 ):
-                    complete_task(task)
+                    complete_task(task, reference_date)
                     st.rerun()
 
         elif status == "Overdue":
@@ -149,7 +151,7 @@ def render_task_card(owner: Owner, task: Task, reference_date: date, current_dat
                     key=button_key,
                     use_container_width=True,
                 ):
-                    complete_task(task)
+                    complete_task(task, reference_date)
                     st.rerun()
 
 
@@ -445,7 +447,7 @@ viewed_date = st.session_state.schedule_date
 current_datetime = datetime.now()
 todays_tasks = scheduler.get_todays_tasks(today)
 total_tasks = len(todays_tasks)
-completed_tasks = sum(1 for task in todays_tasks if task.completed)
+completed_tasks = sum(1 for task in todays_tasks if task.is_completed_on(today))
 pending_tasks = total_tasks - completed_tasks
 
 header_title_col, header_search_col, header_action_col, header_profile_col = st.columns(

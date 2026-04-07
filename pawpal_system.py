@@ -23,6 +23,7 @@ class Task:
     duration_minutes: int
     repeat: str = "none"
     completed: bool = False
+    completed_dates: list[date] = field(default_factory=list)
 
     def get_end_time(self) -> time:
         """Return the task's calculated end time."""
@@ -85,8 +86,26 @@ class Task:
 
         return self.date.weekday() == other_task.date.weekday()
 
-    def mark_complete(self) -> None:
+    def is_completed_on(self, check_date: date) -> bool:
+        """Return whether the task is completed on the given date."""
+        repeat_type = self.repeat.strip().lower()
+
+        if repeat_type in {"daily", "weekly"}:
+            return check_date in self.completed_dates
+
+        return self.completed
+
+    def mark_complete(self, occurrence_date: Optional[date] = None) -> None:
         """Mark the task as completed."""
+        repeat_type = self.repeat.strip().lower()
+
+        if repeat_type in {"daily", "weekly"}:
+            completion_date = occurrence_date if occurrence_date is not None else self.date
+
+            if self.occurs_on(completion_date) and completion_date not in self.completed_dates:
+                self.completed_dates.append(completion_date)
+            return
+
         self.completed = True
 
 

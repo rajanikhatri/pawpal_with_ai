@@ -21,6 +21,22 @@ def test_mark_complete_sets_task_to_completed() -> None:
     assert task.completed is True
 
 
+def test_recurring_task_completion_is_tracked_per_date() -> None:
+    task = Task(
+        title="Daily Medication",
+        category="Medicine",
+        date=date(2026, 4, 7),
+        start_time=time(8, 0),
+        duration_minutes=10,
+        repeat="daily",
+    )
+
+    task.mark_complete(date(2026, 4, 7))
+
+    assert task.is_completed_on(date(2026, 4, 7)) is True
+    assert task.is_completed_on(date(2026, 4, 8)) is False
+
+
 def test_add_task_increases_pet_task_count() -> None:
     pet = Pet(name="Mochi", species="Dog")
     task = Task(
