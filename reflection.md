@@ -48,9 +48,13 @@ The most helpful prompts were specific ones. For example, it worked better when 
 
 One example where I changed an AI suggestion was during the design stage. Some suggestions made the project more complex than I needed, like adding IDs everywhere or making the scheduler more advanced. I decided not to follow that direction and kept the design smaller with just the four main classes and simple recurrence rules. I also checked the code by running the CLI demo, testing the Streamlit app, and running pytest instead of assuming every AI suggestion was correct.
 
+A more technical example came later when I found a bug with recurring task completion. At first, if a daily task was marked complete on one day, it stayed completed on future days too. That showed me that I was treating a recurring task like one permanent object instead of thinking about each occurrence on each date. With AI help, I worked through a cleaner fix: the `Task` model needed to track completion by date for recurring tasks, and the Streamlit UI also needed to check completion based on the currently viewed schedule date. I still had to review the solution carefully, but that change helped me understand the difference between a recurring task definition and a specific occurrence of that task.
+
 ## 5. What I Learned
 
 One thing I learned about system design is that a simple design is often better than a complicated one, especially early on. Having four clear classes made the project easier to build step by step. It also made debugging easier because I could focus on one class at a time.
+
+I also learned that frontend and backend decisions are connected more than I expected. As I improved the Streamlit UI, I sometimes had to revisit backend logic too, especially for recurring tasks and overdue detection. A better interface exposed edge cases that were easy to miss earlier.
 
 I also learned that AI is most useful when I give it clear boundaries. If I ask something broad, the answer can become too big or too complicated. If I ask for one small step at a time, the help is much more useful. I also learned that I still need to review and test everything myself. AI helped me move faster, but I still had to make the final decisions and verify that the code matched my project goals.
 

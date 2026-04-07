@@ -3,8 +3,8 @@
 ## Overview
 
 PawPal+ is a small pet care management project built for a Python OOP class.
-It lets a user add pets, create tasks for those pets, and view today's schedule.
-The project also checks for overlapping tasks and supports simple recurring tasks.
+It lets a user add pets, create and manage care tasks, and view a pet schedule in a simple dashboard.
+The project also checks for overlapping tasks, supports simple recurring tasks, and allows the user to move between different schedule dates.
 
 This project uses:
 
@@ -20,13 +20,21 @@ Streamlit app: [https://pawpal-pet-management-system.streamlit.app/](https://paw
 
 - Add pets
 - Add tasks for pets
-- Show today's schedule
+- Edit tasks
+- Delete tasks
+- Show the schedule for a selected date
+- Navigate between dates with previous, next, and today controls
 - Sort tasks by time
+- Filter tasks by pet
+- Filter tasks by category
 - Show conflict warnings for overlapping tasks
+- Mark tasks as completed
+- Detect overdue tasks automatically for the current day
 - Support simple recurrence options:
   - `none`
   - `daily`
   - `weekly`
+- Track recurring task completion by date so one completed occurrence does not mark all future occurrences as completed
 
 ## Project Structure
 
@@ -46,7 +54,7 @@ pawpal-pet-management-system/
 
 - `pawpal_system.py`: Core backend classes: `Task`, `Pet`, `Owner`, and `Scheduler`
 - `main.py`: Simple CLI demo for testing the system in the terminal
-- `app.py`: Streamlit app for adding pets, adding tasks, and viewing today's schedule
+- `app.py`: Streamlit app for adding pets, managing tasks, filtering the schedule, and viewing dates
 - `tests/test_pawpal.py`: Beginner-friendly pytest tests for core features
 - `docs/uml_diagram.md`: Mermaid class diagram for the project design
 
@@ -81,14 +89,19 @@ Run:
 pytest tests/test_pawpal.py
 ```
 
-## Screenshot Placeholder
+## Demo Video
 
-Add screenshots here later, such as:
+Demo video: [https://youtu.be/FMhza1Jw2e8](https://youtu.be/FMhza1Jw2e8)
 
-- Streamlit home screen
-- Pet creation form
-- Task creation form
-- Today's schedule with conflict warnings
+The video demonstrates:
+
+- Adding pets
+- Creating tasks
+- Editing and deleting tasks
+- Filtering by pet and category
+- Navigating between dates
+- Detecting conflicts and overdue tasks
+- Marking tasks as completed
 
 ## Known Limitations
 
@@ -96,14 +109,13 @@ Add screenshots here later, such as:
 - Refreshing the app can clear pets and tasks
 - There is no database or file persistence yet
 - The app is designed for one owner in the current session
-- The UI is simple and built for a class project
-- Task editing and deletion are not included yet
+- Recurrence rules are intentionally simple and only support `none`, `daily`, and `weekly`
+- The UI is still simple because the project was built for a class assignment
 
 ## Future Improvements
 
 - Save data to JSON or a simple database
-- Add task editing and deletion
 - Add pet removal in the Streamlit app
-- Add filters for pet name or task category in the UI
 - Improve the layout and styling
-- Add more test coverage for recurring tasks and schedule behavior
+- Add more test coverage for recurring tasks, editing, and date navigation
+- Support more advanced recurrence rules if the project grows later
