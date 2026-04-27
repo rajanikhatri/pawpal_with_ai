@@ -1,19 +1,18 @@
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom"
 
 import AIAssistant from "@/pages/AIAssistant"
+import { PET_PROFILE_KEY } from "@/lib/pet"
 import Dashboard from "@/pages/Dashboard"
 import Onboarding from "@/pages/Onboarding"
 import Settings from "@/pages/Settings"
 import Training from "@/pages/Training"
 
-const petProfileKey = "pawpal_pet_profile"
-
 function AppRoutes() {
   const navigate = useNavigate()
-  const hasPetProfile = Boolean(localStorage.getItem(petProfileKey))
+  const hasPetProfile = Boolean(localStorage.getItem(PET_PROFILE_KEY))
 
   const handleOnboardingComplete = (petProfile) => {
-    localStorage.setItem(petProfileKey, JSON.stringify(petProfile))
+    localStorage.setItem(PET_PROFILE_KEY, JSON.stringify(petProfile))
     navigate("/dashboard")
   }
 
