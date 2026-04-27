@@ -229,7 +229,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-l-4 border-gray-100 border-l-[#F4A261] bg-white p-5 shadow-sm">
+        <section className="rounded-xl border border-gray-100 border-l-4 border-l-[#F4A261] bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-[#854F0B]">AI suggestion for {petName}</p>
           <p className="mt-2 text-sm leading-6 text-gray-600">{suggestion}</p>
           <Link
