@@ -129,6 +129,10 @@ export default function Onboarding({ onComplete }) {
   ]
     .filter(Boolean)
     .join(" ")
+  const roleOptions =
+    petProfile.petType === "Cat"
+      ? ["Family member", "Companion", "Indoor cat", "Outdoor cat"]
+      : ["Family member", "Companion", "Guard dog", "Working dog"]
 
   return (
     <main className="min-h-screen bg-[#FAFAF8] px-4 py-6 text-gray-900 sm:px-6">
@@ -255,7 +259,7 @@ export default function Onboarding({ onComplete }) {
               <div className="space-y-3">
                 <FieldLabel>Role</FieldLabel>
                 <div className="flex flex-wrap gap-2">
-                  {["Family member", "Companion", "Guard dog", "Working dog"].map((role) => (
+                  {roleOptions.map((role) => (
                     <Chip
                       key={role}
                       label={role}
