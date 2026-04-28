@@ -6,7 +6,10 @@ app = FastAPI(title="PawPal+ API", version="1.0.0")
 
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=["http://localhost:5173"],
+  allow_origins=[
+    "http://localhost:5173",
+    "https://vercel.com/rajani-khatris-projects/pawpal-with-ai",
+  ],
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
