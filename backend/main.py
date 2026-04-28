@@ -8,7 +8,7 @@ app.add_middleware(
   CORSMiddleware,
   allow_origins=[
     "http://localhost:5173",
-    "https://vercel.com/rajani-khatris-projects/pawpal-with-ai",
+    "https://pawpal-with-9e3bv2hfo-rajani-khatris-projects.vercel.app",
   ],
   allow_credentials=True,
   allow_methods=["*"],
