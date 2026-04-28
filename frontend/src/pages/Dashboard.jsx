@@ -1,33 +1,10 @@
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 
 import BottomNavigation from "@/components/BottomNavigation"
+import { getChecklist } from "@/lib/api"
 import { formatAge, getPetProfile } from "@/lib/pet"
 import { cn } from "@/lib/utils"
-
-const taskItems = [
-  {
-    title: "Morning feeding",
-    time: "7:00 AM",
-    status: "done",
-  },
-  {
-    title: "Potty break",
-    time: "9:00 AM",
-    status: "done",
-  },
-  {
-    title: "Training session",
-    time: "12:00 PM",
-    subtitle: "Practice sit + stay · 10 min",
-    status: "due",
-  },
-  {
-    title: "Evening feeding",
-    time: "6:00 PM",
-    subtitle: "Puppy kibble · 1 cup",
-    status: "upcoming",
-  },
-]
 
 function ageBadgeText(petProfile) {
   const ageYears = Number(petProfile.ageYears || 0)
@@ -98,7 +75,9 @@ function StatusBadge({ status }) {
 }
 
 export default function Dashboard() {
-  const petProfile = getPetProfile()
+  const [petProfile] = useState(() => getPetProfile())
+  const [taskItems, setTaskItems] = useState([])
+  const [checklistLoading, setChecklistLoading] = useState(true)
   const petType = petProfile.petType || "Dog"
   const petEmoji = petType === "Cat" ? "🐱" : "🐶"
   const petName = petProfile.petName || "Your pet"
@@ -108,6 +87,19 @@ export default function Dashboard() {
     petType === "Cat"
       ? "Kittens need feeding every 4-6 hours. Make sure fresh water is always available."
       : "Puppies need potty breaks every 2 hours. Consider adding a midday break around 1 PM."
+
+  useEffect(() => {
+    getChecklist(petProfile)
+      .then((data) => {
+        const items = data.items.map((item, index) => ({
+          ...item,
+          status: index < 2 ? "done" : index === 2 ? "due" : "upcoming",
+        }))
+        setTaskItems(items)
+      })
+      .catch(() => setTaskItems([]))
+      .finally(() => setChecklistLoading(false))
+  }, [petProfile])
 
   return (
     <main className="min-h-screen bg-[#FAFAF8] px-4 py-6 pb-24 text-gray-900 sm:px-6">
@@ -146,34 +138,42 @@ export default function Dashboard() {
 
         <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
           <h2 className="mb-4 font-medium text-gray-900">Today's checklist</h2>
-          <div className="space-y-4">
-            {taskItems.map((task) => (
-              <div key={`${task.title}-${task.time}`} className="flex items-start gap-3">
-                <TaskStatusCircle status={task.status} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <h3
-                        className={cn(
-                          "text-sm font-medium",
-                          task.status === "done"
-                            ? "text-gray-400 line-through"
-                            : "text-gray-900"
-                        )}
-                      >
-                        {task.title}
-                      </h3>
-                      <p className="mt-0.5 text-xs text-gray-500">{task.time}</p>
+          {checklistLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-12 rounded-lg bg-gray-100 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {taskItems.map((task) => (
+                <div key={`${task.title}-${task.time}`} className="flex items-start gap-3">
+                  <TaskStatusCircle status={task.status} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h3
+                          className={cn(
+                            "text-sm font-medium",
+                            task.status === "done"
+                              ? "text-gray-400 line-through"
+                              : "text-gray-900"
+                          )}
+                        >
+                          {task.title}
+                        </h3>
+                        <p className="mt-0.5 text-xs text-gray-500">{task.time}</p>
+                      </div>
+                      <StatusBadge status={task.status} />
                     </div>
-                    <StatusBadge status={task.status} />
+                    {task.subtitle && (
+                      <p className="mt-1 text-sm text-gray-500">{task.subtitle}</p>
+                    )}
                   </div>
-                  {task.subtitle && (
-                    <p className="mt-1 text-sm text-gray-500">{task.subtitle}</p>
-                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="rounded-xl border border-gray-100 border-l-4 border-l-[#F4A261] bg-white p-5 shadow-sm">

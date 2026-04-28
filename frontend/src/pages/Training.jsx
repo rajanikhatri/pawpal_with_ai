@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import BottomNavigation from "@/components/BottomNavigation"
+import { getTrainingFeedback } from "@/lib/api"
 import { getPetProfile } from "@/lib/pet"
 
 const initialSessions = [
@@ -103,18 +104,31 @@ export default function Training() {
     }
 
     const session = {
+      // eslint-disable-next-line react-hooks/purity
       id: Date.now(),
       command,
       duration,
       notes,
       date: new Date().toLocaleDateString(),
-      aiFeedback: `Great work! Consistency is key with ${command}. Try 2-3 short sessions per day for best results.`,
+      aiFeedback: "Getting AI feedback...",
     }
 
-    setSessions((currentSessions) => [session, ...currentSessions])
+    setSessions((prev) => [session, ...prev])
     setShowForm(false)
     resetForm()
     setSuccessMessage("Session saved.")
+
+    getTrainingFeedback(command, duration, notes, petProfile)
+      .then((data) => {
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === session.id
+              ? { ...s, aiFeedback: data.feedback }
+              : s
+          )
+        )
+      })
+      .catch(() => {})
 
     window.setTimeout(() => {
       setSuccessMessage("")

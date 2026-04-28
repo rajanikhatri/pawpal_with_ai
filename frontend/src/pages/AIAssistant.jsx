@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import BottomNavigation from "@/components/BottomNavigation"
+import { askAI } from "@/lib/api"
 import { getPetProfile } from "@/lib/pet"
 
 function buildInitialMessages(petProfile) {
@@ -64,7 +65,7 @@ function AIMessage({ content, confidence, source }) {
         <div className="rounded-2xl rounded-bl-sm border border-gray-100 bg-white px-4 py-3 text-sm text-gray-800 shadow-sm">
           {content}
         </div>
-        {confidence && source && (
+        {confidence !== null && confidence > 0 && source && (
           <div className="mt-2 inline-flex rounded-full bg-[#EAF3DE] px-2 py-1 text-xs text-[#3B6D11]">
             Confidence: {confidence}% · {source}
           </div>
@@ -88,19 +89,16 @@ export default function AIAssistant() {
   ]
   const [messages, setMessages] = useState(() => buildInitialMessages(petProfile))
   const [inputValue, setInputValue] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  const handleSend = (event) => {
+  const handleSend = async (event) => {
     event.preventDefault()
-
     const trimmedInput = inputValue.trim()
-
-    if (!trimmedInput) {
-      return
-    }
+    if (!trimmedInput) return
 
     const userMessage = {
       id: Date.now(),
@@ -108,20 +106,32 @@ export default function AIAssistant() {
       content: trimmedInput,
     }
 
-    setMessages((currentMessages) => [...currentMessages, userMessage])
+    setMessages((prev) => [...prev, userMessage])
     setInputValue("")
+    setIsLoading(true)
 
-    window.setTimeout(() => {
+    try {
+      const data = await askAI(trimmedInput, petProfile)
       const aiMessage = {
         id: Date.now(),
         role: "ai",
-        content: `Thanks for your question about ${petName}! This feature will connect to our AI backend soon. For now here is a tip: always consult your vet for personalized advice.`,
-        confidence: 85,
-        source: "PawPal+ knowledge base",
+        content: data.answer,
+        confidence: Math.round(data.confidence * 100),
+        source: data.source,
       }
-
-      setMessages((currentMessages) => [...currentMessages, aiMessage])
-    }, 800)
+      setMessages((prev) => [...prev, aiMessage])
+    } catch {
+      const errorMessage = {
+        id: Date.now(),
+        role: "ai",
+        content: "Sorry, I could not connect to the server. Please try again.",
+        confidence: null,
+        source: null,
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -189,10 +199,15 @@ export default function AIAssistant() {
             />
             <button
               type="submit"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#4F7942] text-white transition hover:bg-[#426738]"
+              disabled={isLoading}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#4F7942] text-white transition hover:bg-[#426738] disabled:cursor-not-allowed disabled:opacity-60"
               aria-label="Send message"
             >
-              <Send className="h-5 w-5" aria-hidden="true" />
+              {isLoading ? (
+                <span className="text-sm font-semibold" aria-hidden="true">...</span>
+              ) : (
+                <Send className="h-5 w-5" aria-hidden="true" />
+              )}
             </button>
           </form>
         </div>

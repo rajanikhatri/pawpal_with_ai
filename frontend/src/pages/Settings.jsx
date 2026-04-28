@@ -6,7 +6,7 @@ import {
 import { useNavigate } from "react-router-dom"
 
 import BottomNavigation from "@/components/BottomNavigation"
-import { formatAge, getPetProfile } from "@/lib/pet"
+import { PET_PROFILE_KEY, formatAge, getPetProfile } from "@/lib/pet"
 
 const comingSoonFeatures = [
   {
