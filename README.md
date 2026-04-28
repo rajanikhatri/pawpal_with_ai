@@ -11,13 +11,13 @@ An AI-powered pet care assistant for first-time dog and cat owners. PawPal+ uses
 
 This project extends the original PawPal+ (Module 1-3 submission), a Python OOP pet management system built with Streamlit. The original system supported task scheduling, recurring task logic, conflict detection, and a single-owner dashboard. This version rebuilds the frontend in React, replaces the Streamlit UI with a FastAPI backend, and adds a full AI layer using RAG, confidence scoring, interaction logging, and a test harness.
 
----
+
 
 ## What It Does
 
 PawPal+ guides first-time pet owners through everything they need to know in one place. A user creates a pet profile during onboarding (species, breed, age, struggles, training goals), and the app uses that profile to personalize every AI response. The AI assistant answers questions about feeding, training, health, and behavior using a curated veterinary knowledge base rather than general internet knowledge.
 
----
+
 
 ## Architecture Overview
 
@@ -50,7 +50,7 @@ React Frontend renders response + confidence badge
 
 The RAG retriever uses keyword matching to select the most relevant knowledge base file (nutrition, training, or health) for the pet type (dog or cat) before sending anything to the LLM. This means the model answers from grounded context rather than general training data.
 
----
+
 
 ## Setup Instructions
 
@@ -86,7 +86,7 @@ npm run dev
 
 Open `http://localhost:5173` in your browser.
 
----
+
 
 ## Sample Interactions
 
@@ -138,7 +138,7 @@ next step is to praise her calmly after successful use.
 Confidence: 95% · Kitten Training
 ```
 
----
+
 
 ## Design Decisions
 
@@ -154,7 +154,7 @@ The free Gemini API quota was exhausted during development. GPT-4o-mini provides
 **Why localStorage instead of Supabase for the submission**
 Supabase integration was planned but deprioritized to meet the submission deadline. localStorage keeps the demo fast and self-contained. All database schema and Supabase integration code is documented in PLAN.md for the next iteration.
 
----
+
 
 ## Testing Summary
 
@@ -170,7 +170,7 @@ Test 3 (vaccinations) retrieved from the nutrition file instead of the health fi
 
 The system handled all error cases correctly: empty inputs return a 400 error, API failures return a graceful fallback message, and confidence scores are always included in every response.
 
----
+
 
 ## Reflection
 
@@ -178,7 +178,7 @@ Building this project clarified how much of RAG quality depends on retrieval des
 
 The biggest limitation is the keyword retrieval system. A question like "does my puppy need shots" would retrieve the nutrition file because "puppy" scores higher than "shots" does against the health file keywords. A vector embedding approach would handle this correctly. This is the first improvement planned for the next iteration.
 
----
+
 
 ## Coming Soon
 
