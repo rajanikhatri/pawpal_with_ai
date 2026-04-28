@@ -5,7 +5,7 @@ An AI-powered pet care assistant for first-time dog and cat owners. PawPal+ uses
 **Live Demo:** [Add Vercel URL here]
 **Video Walkthrough:** [Add Loom URL here]
 
----
+
 
 ## Base Project
 
