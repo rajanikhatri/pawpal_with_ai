@@ -8,7 +8,7 @@ app.add_middleware(
   CORSMiddleware,
   allow_origins=[
     "http://localhost:5173",
-    "https://pawpal-with-ai.vercel.app/",
+    "https://pawpal-with-ai.vercel.app",
   ],
   allow_credentials=True,
   allow_methods=["*"],
