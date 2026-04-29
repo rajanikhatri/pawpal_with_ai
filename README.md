@@ -2,7 +2,7 @@
 
 An AI-powered pet care assistant for first-time dog and cat owners. PawPal+ uses Retrieval-Augmented Generation (RAG) with OpenAI GPT-4o-mini to deliver personalized, knowledge-grounded care advice based on each pet's profile.
 
-**Live Demo:** pawpal-with-ai.vercel.app
+**Live Demo:** https://pawpal-with-ai.vercel.app
 **Video Walkthrough:** https://youtu.be/iY6Oc1xNxAQ
 
 
